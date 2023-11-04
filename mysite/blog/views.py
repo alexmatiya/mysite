@@ -1,28 +1,36 @@
 from django.shortcuts import render, get_object_or_404
 from blog.models import Post, Comment
-# from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import ListView
 from blog.forms import EmailPostForm, CommentForm
 from django.core.mail import send_mail
 from mysite.settings import EMAIL_HOST_USER
 from django.views.decorators.http import require_POST
-# def post_list(request):
-#     posts_list = Post.published.all()
-#     paginator = Paginator(posts_list, 3)
-#     page_number = request.GET.get('page', 1)
-#     try:
-#         posts = paginator.page(page_number)
-#     except PageNotAnInteger:
-#         # Если page_number не целое число, то
-#         # выдать первую страницу
-#         posts = paginator.page(1)
-#     except EmptyPage:
-#         # Если page_number находится вне диапазона, то
-#         # выдать последнюю страницу результатов
-#         posts = paginator.page(paginator.num_pages)
-#     return render(request,
-#                   'blog/post/list.html',
-#                   {'posts': posts})
+from taggit.models import Tag
+
+
+def post_list(request, tag_slug=None):
+    post_list = Post.published.all()
+    tag = None 
+    if tag_slug: 
+        tag = get_object_or_404(Tag, slug=tag_slug)
+        post_list = post_list.filter(tags__in=[tag])
+    paginator = Paginator(post_list, 3)
+    page_number = request.GET.get('page', 1)
+    try:
+        posts = paginator.page(page_number)
+    except PageNotAnInteger:
+        # Если page_number не целое число, то
+        # выдать первую страницу
+        posts = paginator.page(1)
+    except EmptyPage:
+        # Если page_number находится вне диапазона, то
+        # выдать последнюю страницу результатов
+        posts = paginator.page(paginator.num_pages)
+    return render(request,
+                  'blog/post/list.html',
+                  {'posts': posts,
+                   'tag': tag})
 
 
 def post_detail(request, year, month, day, post):
