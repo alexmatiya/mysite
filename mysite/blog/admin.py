@@ -1,5 +1,5 @@
 from django.contrib import admin
-from blog.models import Post
+from blog.models import Post, Comment
 
 
 @admin.register(Post)
@@ -11,3 +11,10 @@ class PostAdmin(admin.ModelAdmin):
     raw_id_fields = ['author']  # при создании поста автор теперь с поисковом окне а не в выпадающем
     date_hierarchy = 'publish'  # добавилась навигационная ссылка по датам
     ordering = ['status', 'publish']
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ['name', 'email', 'post', 'created', 'active']
+    list_filter = ['active', 'created', 'updated']
+    search_fields = ['name', 'email', 'body']
